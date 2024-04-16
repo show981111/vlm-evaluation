@@ -26,7 +26,7 @@ class DatasetPreparationConfig:
     # Processing Parameters
     create_slim_dataset: bool = True                            # Whether to create "slim" (minified) dataset(s)
     slim_dataset_sizes: Tuple[int, ...] = (                     # Number of examples for the slim dataset(s)
-        1024, 8192
+        100, 1024, 8192
     )
     export_formats: Tuple[str, ...] = (                         # Formats for export (always writes a "Map" Dataset)
         "webdataset",
@@ -40,8 +40,8 @@ class DatasetPreparationConfig:
 
     # Path Parameters
     root_dir: Path = Path(                                      # Path to root directory for storing datasets
-        # "datasets/vlm-evaluation"
-        "/mnt/fsx/skaramcheti/datasets/vlm-evaluation"
+        "/data/datasets/vlm-evaluation"
+        # "/mnt/fsx/skaramcheti/datasets/vlm-evaluation"
     )
 
     # HF Hub Credentials (for LLaMa-2)
@@ -57,9 +57,9 @@ def prepare(cfg: DatasetPreparationConfig) -> None:
     overwatch.info(f"Downloading and Preparing VLM Evaluation Dataset `{cfg.dataset_family}`")
 
     # Phase 1 :: Download & Extract Raw Data to `cfg.data_dir` / cfg.dataset_id / "download"
-    overwatch.info(f"Phase 1 =>> Downloading & Extracting `{cfg.dataset_family}` to {cfg.root_dir / 'download'}")
-    hf_token = cfg.hf_token.read_text().strip() if isinstance(cfg.hf_token, Path) else os.environ[cfg.hf_token]
-    download_extract(cfg.dataset_family, cfg.root_dir, hf_token)
+    # overwatch.info(f"Phase 1 =>> Downloading & Extracting `{cfg.dataset_family}` to {cfg.root_dir / 'download'}")
+    # hf_token = cfg.hf_token.read_text().strip() if isinstance(cfg.hf_token, Path) else os.environ[cfg.hf_token]
+    # download_extract(cfg.dataset_family, cfg.root_dir, hf_token)
 
     # Phase 2 :: Assemble Index Dataset(s) (always builds metadata from local disk, then used to export other formats)
     overwatch.info(f"Phase 2 =>> Building Index Dataset(s) for `{cfg.dataset_family}` at {cfg.root_dir / 'datasets'}")

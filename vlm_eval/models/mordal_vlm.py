@@ -12,12 +12,12 @@ import torch
 import torch.nn as nn
 from accelerate import PartialState
 from PIL.Image import Image
-from prismatic import load
+from vlm_eval import load_checkpoint
 
 from vlm_eval.util.interfaces import VLM, ImageProcessor, Tokenizer
 
 
-class PrismaticVLM(VLM):
+class MordalVLM(VLM):
     def __init__(
         self,
         model_family: str,
@@ -31,6 +31,8 @@ class PrismaticVLM(VLM):
         **_: str,
     ) -> None:
         self.model_family, self.model_id, self.run_dir = model_family, model_id, run_dir
+        if not torch.cuda.is_bf16_supported():
+            load_precision = "fp16"
         self.dtype = {"fp32": torch.float32, "fp16": torch.float16, "bf16": torch.bfloat16}[load_precision]
         self.hf_token = hf_token
         self.ocr = ocr
@@ -44,7 +46,8 @@ class PrismaticVLM(VLM):
         # Set Default VQA Generation Configuration
         self.max_length = max_length
         self.temperature = temperature
-        self.generate_kwargs = {"do_sample": False, "max_new_tokens": self.max_length, "temperature": self.temperature}
+        self.generate_kwargs = {"do_sample": False, "max_new_tokens": self.max_length, "temperature": self.temperature, "repetition_penalty": 1.0}
+        print("Generation config:",self.generate_kwargs)
 
     def load(self) -> Tuple[nn.Module, Tokenizer, ImageProcessor]:
         """Load a Prismatic/Quartz Model using the default `prisma.load_pretrained_vlm` initializer."""
@@ -56,8 +59,9 @@ class PrismaticVLM(VLM):
         else:
             raise ValueError("Model Dir and ID cannot both be None")
 
+        print(f"Loading the checkpoint from {load_from}")
         # Get Fully Initialized VLM Instance (+ handle `load_precision`)
-        vlm = load(load_from, hf_token=self.hf_token)
+        vlm = load_checkpoint(str(load_from), "cpu") # , hf_token=self.hf_token
         vlm.to(self.distributed_state.device, dtype=self.dtype)
 
         # Get Tokenizer and Image Processor
@@ -222,12 +226,12 @@ class PrismaticVLM(VLM):
         question_prompts: List[str],
         return_string_probabilities: Optional[List[str]] = None,
     ) -> Union[List[str], Tuple[List[str], List[List[float]]]]:
-        start = datetime.now()
+        # start = datetime.now()
         res = self.model.generate_batch(
             pixel_values, question_prompts, return_string_probabilities, **self.generate_kwargs
         )
         end = datetime.now()
-        print("Generate_batch", end - start)
+        # print("Generate_batch()",end - start)
         return res 
 
     @torch.inference_mode()

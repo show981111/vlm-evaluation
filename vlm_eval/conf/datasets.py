@@ -93,11 +93,11 @@ class GQASlimDatasetConfig(DatasetConfig):
     dataset_id: str = "gqa-slim"
     split: str = "testdev_balanced"
 
-    expected_examples: int = 1024
+    expected_examples: int = 100
 
     root_dir: Path = Path("../../datasets/vlm-evaluation")
-    index_file: Path = Path("datasets/gqa/metadata-slim-1024.json")
-    annotations_file: Path = Path("datasets/gqa/annotations-gqa-slim-1024.json")
+    index_file: Path = Path("datasets/gqa/metadata-slim-100.json")
+    annotations_file: Path = Path("datasets/gqa/annotations-gqa-slim-100.json")
 
 
 # === VizWiz Datasets =>> Note: "Slim" defaults to k = 1024 examples ===

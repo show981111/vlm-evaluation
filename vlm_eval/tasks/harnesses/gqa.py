@@ -84,9 +84,15 @@ def build_gqa_indices(root_dir: Path, slim_dataset_sizes: Optional[Tuple[int, ..
     all_qids = list(index.keys())
     Random(seed).shuffle(all_qids)  # Python `random.shuffle` is an in-place operation for... reasons...
 
+    with open("/users/leeyongs/mordal-vlm/vlm-evaluation/anchors.json", "r") as f:
+        anchor_qids = json.load(f)
+        print(anchor_qids)
+        # print(index.keys())
+
     # Write `metadata.json` (for the complete evaluation set)
     for index_file in index_files:
         if index_file.name == "metadata-full.json":
+            # pass 
             with open(index_file, "w") as f:
                 json.dump({k: index[k] for k in all_qids}, f)
 
@@ -98,12 +104,19 @@ def build_gqa_indices(root_dir: Path, slim_dataset_sizes: Optional[Tuple[int, ..
         elif index_file.name.startswith("metadata-slim-"):
             n_slim = int(re.search("-slim-(.+?).json", index_file.name).group(1))
             with open(index_file, "w") as f:
-                json.dump({k: index[k] for k in all_qids[:n_slim]}, f)
+                if n_slim == 100: 
+                    json.dump({k: index[int(k)] for k in anchor_qids}, f)
+                else:
+                    json.dump({k: index[k] for k in all_qids[:n_slim]}, f)
 
             # Dump Sampled Questions/Answers to `dataset_dir` in the exact same format as `paths["questions_answers"]`
             slim_qid2question = {str(qid): qid2question[str(qid)] for qid in all_qids[:n_slim]}
             with open(dataset_dir / f"annotations-gqa-slim-{n_slim}.json", "w") as f:
-                json.dump(slim_qid2question, f)
+                if n_slim == 100: 
+                    json.dump({k: index[int(k)] for k in anchor_qids}, f)
+                else: 
+                    json.dump(slim_qid2question, f)
+                
 
         else:
             raise ValueError(f"Received unexpected index file `{index_file}`")
@@ -118,6 +131,7 @@ class GQAIndexDataset(Dataset):
         self.root_dir, self.index_file = root_dir, index_file
 
         # Load from `index_file` --> Dict :: qid -> { question / answer / image data } --> flatten
+        print(self.root_dir / self.index_file)
         with open(self.root_dir / self.index_file, "r") as f:
             self.examples = list(json.load(f).values())
 
