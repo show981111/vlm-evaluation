@@ -56,7 +56,7 @@ class DatasetPreparationConfig:
 def prepare(cfg: DatasetPreparationConfig) -> None:
     overwatch.info(f"Downloading and Preparing VLM Evaluation Dataset `{cfg.dataset_family}`")
 
-    # Phase 1 :: Download & Extract Raw Data to `cfg.data_dir` / cfg.dataset_id / "download"
+    # # Phase 1 :: Download & Extract Raw Data to `cfg.data_dir` / cfg.dataset_id / "download"
     # overwatch.info(f"Phase 1 =>> Downloading & Extracting `{cfg.dataset_family}` to {cfg.root_dir / 'download'}")
     # hf_token = cfg.hf_token.read_text().strip() if isinstance(cfg.hf_token, Path) else os.environ[cfg.hf_token]
     # download_extract(cfg.dataset_family, cfg.root_dir, hf_token)

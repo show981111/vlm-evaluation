@@ -110,11 +110,12 @@ def build_gqa_indices(root_dir: Path, slim_dataset_sizes: Optional[Tuple[int, ..
                     json.dump({k: index[k] for k in all_qids[:n_slim]}, f)
 
             # Dump Sampled Questions/Answers to `dataset_dir` in the exact same format as `paths["questions_answers"]`
-            slim_qid2question = {str(qid): qid2question[str(qid)] for qid in all_qids[:n_slim]}
             with open(dataset_dir / f"annotations-gqa-slim-{n_slim}.json", "w") as f:
                 if n_slim == 100: 
-                    json.dump({k: index[int(k)] for k in anchor_qids}, f)
+                    slim_qid2question = {str(qid): qid2question[str(qid)] for qid in anchor_qids}
+                    json.dump(slim_qid2question, f)
                 else: 
+                    slim_qid2question = {str(qid): qid2question[str(qid)] for qid in all_qids[:n_slim]}
                     json.dump(slim_qid2question, f)
                 
 
