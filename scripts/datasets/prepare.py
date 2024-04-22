@@ -4,6 +4,7 @@ prepare.py
 Entry point for dataset downloading & preparation -- handles all aspects of the raw data acquisition, extraction, and
 verification process, writing both WebDataset and Mosaic Streaming (MDS) versions of the data.
 """
+from enum import Enum
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,6 +33,8 @@ class DatasetPreparationConfig:
         "webdataset",
         "mosaic-streaming",
     )
+
+    sample_indices: Path = Path("../../data/anchors/")
 
     # Format-Specific Parameters
     max_shard_size_bytes: int = 64000000                        # Maximum size for a shard in bytes (default: 64 MB)

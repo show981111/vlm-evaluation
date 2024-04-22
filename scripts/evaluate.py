@@ -70,6 +70,16 @@ class EvaluationConfig:
     seed: int = 21                                  # Random Seed (for reproducibility)
 
     def __post_init__(self) -> None:
+        if self.model_dir is None: 
+            if self.model_id.find("instructblip") != -1:
+                self.model_family = "instruct-blip"
+                self.model_dir = Path(f"Salesforce/{self.model_id}")
+            elif self.model_id.find("llava") != -1: 
+                self.model_family = "llava-v15"
+                self.model_dir = Path(f"liuhaotian/{self.model_id}")
+            elif self.model_id.find("mordal") != -1: 
+                self.model_family = "mordal"
+                self.model_dir = Path(f"shiqihe/{self.model_id}")
         self.run_dir = self.model_dir
 
     # fmt: on
@@ -82,6 +92,7 @@ def evaluate(cfg: EvaluationConfig) -> None:
 
     # Short-Circuit (if results/metrics already exist)
     task_results_dir = cfg.results_dir / cfg.dataset.dataset_family / cfg.dataset.dataset_id / cfg.model_id
+    print("[MODEL CONFIG]", cfg.model_family, cfg.model_id, cfg.run_dir)
     if (task_results_dir / "metrics.json").exists():
         overwatch.info(f"Metrics for `{cfg.dataset.dataset_id}` w/ `{cfg.model_id}` exist =>> exiting!")
         return

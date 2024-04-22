@@ -76,6 +76,8 @@ class LLaVa(VLM):
     ) -> None:
         self.model_family, self.model_id, self.hub_path = model_family, model_id, run_dir
         self.dtype = {"fp32": torch.float32, "fp16": torch.float16, "bf16": torch.bfloat16}[load_precision]
+        if load_precision == "bf16" and not torch.cuda.is_bf16_supported():
+            self.dtype = torch.float16
         self.ocr = ocr
 
         # Get Distributed State
